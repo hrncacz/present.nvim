@@ -2,7 +2,7 @@
 
 This is training nvim plugin for markdown files.
 
-# `Usage`
+## `Usage`
 
 ```lua
 require("present").start_presentation {}
