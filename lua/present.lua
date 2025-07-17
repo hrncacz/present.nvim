@@ -21,6 +21,7 @@ end
 ---@class present.Slide
 ---@field title string: The title of the slide
 ---@field body string[]: The body of slide
+---@field blocks string[]: A codeblock inside a slide
 ---
 ---@class present.Slides
 ---@field slides present.Slide[]: The slides of the file
@@ -41,13 +42,39 @@ local parse_slides = function(lines)
 
 			current_slide = {
 				title = line,
-				body = {}
+				body = {},
+				blocks = {}
 			}
 		else
 			table.insert(current_slide.body, line)
 		end
 	end
 	table.insert(slides.slides, current_slide)
+
+	for _, slide in ipairs(slides.slides) do
+		local block = ""
+		local inside_block = false
+		for _, line in ipairs(slide.body) do
+			if vim.startswith(line, "```") then
+				if not inside_block then
+					inside_block = true
+					block = block .. line .. "\n"
+				else
+					inside_block = false
+					block = block .. line .. "\n"
+					table.insert(slide.blocks, vim.trim(block))
+					block = ""
+				end
+			else
+				if inside_block then
+					-- We are inside of current markdown block
+					-- but it is not one of the guards
+					-- so insert this text
+					block = block .. line .. "\n"
+				end
+			end
+		end
+	end
 
 	return slides
 end
@@ -105,7 +132,7 @@ local state = {
 	parsed = {},
 	current_slide = 1,
 	floats = {},
-	title = "Kundus"
+	title = ""
 }
 
 local foreach_float = function(cb)
