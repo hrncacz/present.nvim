@@ -226,5 +226,7 @@ end
 -- Tengo hijo y hija
 -- # Mi hijo llama Martin
 -- # Mi hija llama Miriam
+--
+M._parse_slides = parse_slides
 
 return M
